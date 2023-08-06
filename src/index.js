@@ -40,11 +40,14 @@ export class GeoTickGen {
     container.appendChild(gtg.svg);
     gtg.map.once("load", () => {
       gtg.map.on("move", () => gtg.update());
-      gtg.map.on("mousemove", gtg.mouseDebug.bind(gtg));
       gtg.update();
     });
   }
 
+  /**
+   * Mouse debug
+   * gtg.map.on("mousemove", gtg.mouseDebug.bind(gtg));
+   */
   mouseDebug(e) {
     const gtg = this;
     const x = e.point.x;
