@@ -131,44 +131,6 @@ export class GeoTickGen {
     }
   }
 
-  buildTicks_d3(type) {
-    const gtg = this;
-
-    // Create series
-    const series = gtg.createSeries(type);
-
-    // For each value in the series
-    for (let i = 0, iL = series.length; i < iL; i++) {
-      const isFirst = i === 0;
-      const item = series[i];
-      const label = item.label;
-      const tick = item.tick;
-
-      gtg.svg
-        .append("rect")
-        .attr("x", tick.x)
-        .attr("y", tick.y)
-        .attr("width", tick.width)
-        .attr("height", tick.height)
-        .attr("class", "outline");
-
-      // Add label for major ticks
-      if (label && !isFirst) {
-        gtg.svg
-          .append("text")
-          .attr("x", label.x)
-          .attr("y", label.y)
-          .attr("class", "outline")
-          .attr(
-            "transform",
-            `rotate(${label.rotation}, ${label.x}, ${label.y})`
-          )
-          .style("font-size", `${label.size}px`)
-          .text(label.text);
-      }
-    }
-  }
-
   createSeries(type) {
     const gtg = this;
     const series = [];
@@ -186,20 +148,19 @@ export class GeoTickGen {
       throw new Error("nStepMajor must be a divider of nStepMinor");
     }
 
-    const start = 0;
-    const end = isLat ? h : w;
+    const bounds = gtg.map.getBounds();
+    const min = isLat ? bounds.getSouth() : bounds.getWest();
+    const max = isLat ? bounds.getNorth() : bounds.getEast();
+    const step = (max - min) / nStepMinor;
 
-    const step = (end - start) / nStepMinor; // Calculate step size for minor parts
-    const majorStep = nStepMinor / nStepMajor;
-
-    // Create series
     for (let i = 0; i <= nStepMinor; i++) {
-      const pos = start + i * step;
-      const isMajor = i % majorStep === 0;
+      const geoPoint = min + i * step;
+      const isMajor = i % (nStepMinor / nStepMajor) === 0;
       const size = isMajor ? sizeMj : sizeMn;
+      const pixelPoint = gtg.map.project(isLat ? [0, geoPoint] : [geoPoint, 0]);
       const tick = {
-        y: isLat ? pos : h - size,
-        x: isLat ? 0 : pos,
+        y: isLat ? pixelPoint.y : h - size,
+        x: isLat ? 0 : pixelPoint.x,
         height: isLat ? 1 : size,
         width: isLat ? size : 1,
       };
@@ -207,21 +168,19 @@ export class GeoTickGen {
         tick,
       };
       if (isMajor) {
-        const coord = gtg.map.unproject([tick.x, tick.y]);
         item.label = {
           y: isLat ? tick.y + sizeFont / 2 : h - sizeMj - lo,
           x: isLat ? size + lo : tick.x,
-          text: gtg.convertDMS(isLat ? coord.lat : coord.lng),
+          text: gtg.convertDMS(isLat ? geoPoint : geoPoint),
           rotation: isLat ? 0 : -45,
           size: sizeFont,
         };
       }
-
       series.push(item);
     }
-
     return series;
   }
+
   convertDMS(degree) {
     const absDegree = Math.abs(degree);
     const degrees = Math.floor(absDegree);
