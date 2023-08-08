@@ -70,7 +70,7 @@ export class GeoTickGen {
 
   get size() {
     const gtg = this;
-    return gtg.map.getContainer().getBoundingClientRect();
+    return gtg.svg.getBoundingClientRect();
   }
 
   get width() {
