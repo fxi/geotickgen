@@ -9,13 +9,21 @@ const DEFAULT_OPTIONS = {
     nStepMajor: 10, // nStepMinor divider
     enableLat: true,
     enableLng: true,
-    fontSize: 12,
+    fontSize: 12, // for compute label position. Should match CSS
     offsetLabel: 4,
     offsets: {
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0,
+      lat: {
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+      },
+      lng: {
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+      },
     },
   },
 };
@@ -27,8 +35,7 @@ export class GeoTickGen {
   constructor(map, userOptions = {}) {
     const gtg = this;
     gtg.map = map;
-    gtg.options = { ...DEFAULT_OPTIONS, ...userOptions };
-
+    gtg.options = deepMerge({}, DEFAULT_OPTIONS, userOptions);
     gtg.init();
   }
 
@@ -97,7 +104,6 @@ export class GeoTickGen {
 
     // For each value in the series
     for (let i = 0, iL = series.length; i < iL; i++) {
-      const isFirst = i === 0;
       const item = series[i];
       const label = item.label;
       const tick = item.tick;
@@ -115,7 +121,7 @@ export class GeoTickGen {
       gtg.svg.appendChild(rect);
 
       // Add label for major ticks
-      if (label && !isFirst) {
+      if (label) {
         const text = document.createElementNS(
           "http://www.w3.org/2000/svg",
           "text"
@@ -135,10 +141,11 @@ export class GeoTickGen {
     }
   }
 
-  get bounds() {
+  getBounds(type = "lon") {
     const gtg = this;
     const x = gtg.width;
     const y = gtg.height;
+    const o = gtg.options.ticks.offsets[type];
     /*
      *
      *  nw 0,0       ne x,0
@@ -151,10 +158,10 @@ export class GeoTickGen {
      *    └──────────┘
      *  sw 0,y       se x,y
      */
-    const nw = gtg.map.unproject([0, 0]);
-    const se = gtg.map.unproject([x, y]);
-    const sw = gtg.map.unproject([0, y]);
-    const ne = gtg.map.unproject([x, 0]);
+    const nw = gtg.map.unproject([o.right, o.top]);
+    const se = gtg.map.unproject([x - o.left, y - o.bottom]);
+    const sw = gtg.map.unproject([o.left, y - o.bottom]);
+    const ne = gtg.map.unproject([x - o.right, o.top]);
     return { ne, se, sw, nw };
   }
 
@@ -174,7 +181,7 @@ export class GeoTickGen {
       throw new Error("nStepMajor must be a divider of nStepMinor");
     }
 
-    const b = gtg.bounds;
+    const b = gtg.getBounds(type);
 
     const min = isLat
       ? { lng: b.sw.lng, lat: b.sw.lat }
@@ -199,6 +206,7 @@ export class GeoTickGen {
         height: isLat ? 1 : size,
         width: isLat ? size : 1,
       };
+
       const item = {
         tick,
       };
@@ -226,4 +234,29 @@ export class GeoTickGen {
     const seconds = secFloat.toFixed(0);
     return `${isSouth ? "S" : "N"} ${degrees}° ${minutes}' ${seconds}" `;
   }
+}
+
+/**
+ * helper functions
+ */
+function isObject(item) {
+  return item && typeof item === "object" && !Array.isArray(item);
+}
+
+function deepMerge(target, ...sources) {
+  if (!sources.length) return target;
+  const source = sources.shift();
+
+  if (isObject(target) && isObject(source)) {
+    for (const key in source) {
+      if (isObject(source[key])) {
+        if (!target[key]) Object.assign(target, { [key]: {} });
+        deepMerge(target[key], source[key]);
+      } else {
+        Object.assign(target, { [key]: source[key] });
+      }
+    }
+  }
+
+  return deepMerge(target, ...sources);
 }

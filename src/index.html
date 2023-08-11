@@ -30,11 +30,12 @@
       }
 
       .gtg-outline {
-        fill: #ffffff;
-        stroke: rgba(10, 10, 10, 0.8);
-        font-size: 10px;
+        stroke: #fff;
+        fill: #000;
+        font-family: monospace;
+        font-size: 12px;
         paint-order: stroke;
-        stroke-width: 2px;
+        stroke-width: 3px;
         stroke-linecap: round;
         stroke-linejoin: round;
       }
@@ -53,7 +54,34 @@
         zoom: 2, // starting zoom
       });
 
-      const tickGen = new GeoTickGen(map);
+      const opt = {
+        ticks: {
+          sizeMinor: 10,
+          sizeMajor: 20,
+          nStepMinor: 50,
+          nStepMajor: 10,
+          enableLat: true,
+          enableLng: true,
+          fontSize: 12,
+          offsetLabel: 5,
+          offsets: {
+            lat: {
+              top: 100,
+              right: 0,
+              bottom: 100,
+              left: 0,
+            },
+            lng: {
+              top: 0,
+              right: 100,
+              bottom: 0,
+              left: 100,
+            },
+          },
+        },
+      };
+
+      const tickGen = new GeoTickGen(map, opt);
       window.gtg = tickGen;
     </script>
   </body>

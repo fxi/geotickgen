@@ -53,11 +53,12 @@ const tickGen = new GeoTickGen(map, {
 }
 
 .gtg-outline {
-  fill: #ffffff;
-  stroke: rgba(10, 10, 10, 0.8);
-  font-size: 10px;
+  stroke: #fff;
+  fill: #000;
+  font-family: monospace;
+  font-size: 12px; /*should match configuration*/
   paint-order: stroke;
-  stroke-width: 2px;
+  stroke-width: 3px;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -72,22 +73,30 @@ Default options:
 ```javascript
 {
   ticks: {
-    sizeMinor: 10,
-    sizeMajor: 20,
-    nStepMinor: 100,
-    nStepMajor: 10, // nStepMinor divider
-    enableLat: true,
-    enableLng: true,
-    fontSize: 12,
-    offsetLabel: 4,
-    offsets: {
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0
-    }
-  }
-}
+    sizeMinor: 10, // tick width
+    sizeMajor: 20, // major tick width
+    nStepMinor: 50, // number of step
+    nStepMajor: 10, // major step each n
+    enableLat: true, // show latitudes 
+    enableLng: true, // show longitudes
+    fontSize: 12, // for compute label position. Should match CSS
+    offsetLabel: 4, // distance tick-label
+    offsets: { // offsets of ticks bars
+      lat: {
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+      },
+      lng: {
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+      },
+    },
+  },
+};
 ```
 
 You can override these options by passing in your own configuration object when creating an instance of `GeoTickGen`.
