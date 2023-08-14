@@ -49,11 +49,40 @@
       const map = new maplibregl.Map({
         container: "map",
         style: "https://demotiles.maplibre.org/style.json", // stylesheet location
-        center: [-74.5, 40], // starting position [lng, lat]
-        zoom: 9, // starting zoom
+        center: [0, 0], // starting position [lng, lat]
+        zoom: 2, // starting zoom
       });
 
-      const tickGen = new GeoTickGen(map);
+      const opt = {
+        ticks: {
+          sizeMinor: 10,
+          sizeMajor: 20,
+          nStepMinor: 50,
+          nStepMajor: 10,
+          enableLat: true,
+          enableLng: true,
+          fontSize: 12,
+          offsetLabel: 5,
+          offsets: {
+            lat: {
+              top: 100,
+              right: 0,
+              bottom: 100,
+              left: 0,
+            },
+            lng: {
+              top: 0,
+              right: 100,
+              bottom: 0,
+              left: 100,
+            },
+          },
+        },
+      };
+
+      const tickGen = new GeoTickGen(map, opt);
+      window.gtg = tickGen;
+
     </script>
   </body>
 </html>
