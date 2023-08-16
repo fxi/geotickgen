@@ -45,10 +45,8 @@ export class GeoTickGen {
     gtg.svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     gtg.svg.classList.add("gtg-container");
     container.appendChild(gtg.svg);
-    gtg.map.once("load", () => {
-      gtg.map.on("move", () => gtg.update());
-      gtg.update();
-    });
+    gtg.map.on("move", () => gtg.update());
+    gtg.update();
   }
 
   /**
